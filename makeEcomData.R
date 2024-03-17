@@ -3,7 +3,7 @@
 makeEcomData <- function(pathMamOccs, pathEcoTraits, massVar){
   require(e1071)
   Occs <- read.csv(pathMamOccs, header=T) # read occurrence matrix
-  ##Occs <- Occs[,2:ncol(Occs)] #trim off first column ## This has already been done in Excel
+  Occs <- Occs[,2:ncol(Occs)] #trim off first column ## This has already been done in Excel
   jdat <- Occs[2:ncol(Occs)]  #"just data columns without HID label
   jdat[jdat == 0] <- NA
 
@@ -25,7 +25,8 @@ makeEcomData <- function(pathMamOccs, pathEcoTraits, massVar){
     SF <- rep(NA, len=Occs$SpCount[k])
     AL <- rep(NA, len=Occs$SpCount[k])  
     BUN <- rep(NA, len=Occs$SpCount[k])
-    BUN2 <- rep(NA, len=Occs$SpCount[k])
+    OT <- rep(NA, len=Occs$SpCount[k])
+    AA <- rep(NA, len=Occs$SpCount[k])
 
     ## V[1] <-  #HID as first entry
     indx <- which(jdat[k,]=='1', arr.ind=TRUE)  #which entries in row k have 1 for that species
@@ -36,7 +37,7 @@ makeEcomData <- function(pathMamOccs, pathEcoTraits, massVar){
     ## BMASS loop
       for (p in (1:length(species))) {
         spec <- as.character(species[p])  #pulls species
-        logl <- ecomt[ecomt$Binomial==spec, massVar] ## body MASS value for a given species 
+        logl <- ecomt[ecomt$Binomial==spec, "massg"] ## body MASS value for a given species 
         BMASS[p] <- logl[1]
       }
 
@@ -79,10 +80,18 @@ makeEcomData <- function(pathMamOccs, pathEcoTraits, massVar){
         logl <- ecomt[ecomt$Binomial==spec,"BUN"]
         BUN[p] <- logl[1]
       }
-    ## BUN2
-      BUN2 <- BUN*2 
-      BUN2[SF > 0] <- 1
-
+    ## OT
+      for (p in (1:length(species))) {
+        spec <- as.character(species[p])  #pulls species name
+        logl <- ecomt[ecomt$Binomial==spec,"OT"]
+        OT[p] <- logl[1]
+      }      
+      # Exclusively acute
+      for (p in (1:length(species))) {
+        spec <- as.character(species[p])  #pulls species name
+        logl <- ecomt[ecomt$Binomial==spec,"Excl_AL"]
+        AA[p] <- logl[1]
+      }
     }
 
     ## combining data for a HID
@@ -137,13 +146,20 @@ makeEcomData <- function(pathMamOccs, pathEcoTraits, massVar){
       max(BUN, na.rm=TRUE)-min(BUN, na.rm=TRUE),
       skewness(BUN, na.rm=TRUE),
       kurtosis(BUN, na.rm=TRUE, type = 1),
-      mean(BUN2, na.rm=TRUE),
-      sd(BUN2, na.rm=TRUE),
-      min(BUN2, na.rm=TRUE),
-      max(BUN2, na.rm=TRUE),
-      max(BUN2, na.rm=TRUE)-min(BUN2, na.rm=TRUE),
-      skewness(BUN2, na.rm=TRUE),
-      kurtosis(BUN2, na.rm=TRUE, type = 1)
+      mean(OT, na.rm=TRUE),
+      sd(OT, na.rm=TRUE),
+      min(OT, na.rm=TRUE),
+      max(OT, na.rm=TRUE),
+      max(OT, na.rm=TRUE)-min(OT, na.rm=TRUE),
+      skewness(OT, na.rm=TRUE),
+      kurtosis(OT, na.rm=TRUE, type = 1)
+      mean(AA, na.rm=TRUE),
+      sd(AA, na.rm=TRUE),
+      min(AA, na.rm=TRUE),
+      max(AA, na.rm=TRUE),
+      max(AA, na.rm=TRUE)-min(OT, na.rm=TRUE),
+      skewness(AA, na.rm=TRUE),
+      kurtosis(AA, na.rm=TRUE, type = 1)
     )
     print(k)
     Sys.sleep(0.01)
@@ -156,8 +172,9 @@ makeEcomData <- function(pathMamOccs, pathEcoTraits, massVar){
   "ALskew", "ALkurt", "OL", "OLsd", "OLmin", "OLmax", "OLrange",
   "OLskew", "OLkurt", "SF", "SFsd", "SFmin", "SFmax", "SFrange",
   "SFskew", "SFkurt", "BUN", "BUNsd", "BUNmin", "BUNmax", "BUNrange",
-  "BUNskew", "BUNkurt", "BUN2", "BUN2sd", "BUN2min", "BUN2max", "BUN2range",
-  "BUN2skew", "BUN2kurt")
+  "BUNskew", "BUNkurt", "OT", "OTsd", "OTmin", "OTmax", "OTrange",
+  "OTskew", "OTkurt", "AA", "AAsd", "AAmin", "AAmax", "AArange",
+  "AAskew", "AAkurt")
   EM <- as.data.frame(EM)
   row.names(EM) <- NULL
   return(EM)
