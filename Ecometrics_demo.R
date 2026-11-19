@@ -329,9 +329,7 @@ ggplot(sites_sub,
   geom_errorbar(aes(ymin = Lower95, ymax = Upper95),
     width = 0.3) +
   
-  coord_flip() +
-  
-  theme_bw() +
+  coord_flip(ylim = c(-10, 60)) +
   
   labs(
     x = "Fossil Site",
