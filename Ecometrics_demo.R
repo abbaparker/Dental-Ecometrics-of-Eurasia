@@ -17,6 +17,8 @@
 library(tidyverse)
 library(rnaturalearth)
 library(sf)
+library(raster)
+library(blockCV)
 library(mgcv)
 library(earth)
 library(e1071)
